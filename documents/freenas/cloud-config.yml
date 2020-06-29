@@ -1,0 +1,26 @@
+#cloud-config
+write_files:
+  - path: /etc/rc.local
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/bin/bash
+      mkdir -p /mnt/shares
+      mkdir -p /mnt/container
+      cloud-init-execute
+rancher:
+  services:
+    nfs:
+      image: d3fk/nfs-client
+      labels:
+        io.rancher.os.after: console, preload-user-images
+        io.rancher.os.scope: system
+      net: host
+      privileged: true
+      tty: true
+      restart: always
+      volumes:
+        - /usr/bin/iptables:/sbin/iptables:ro
+mounts:
+- ["192.168.41.10:/mnt/myvol/hosthub", "/mnt/shares", "nfs4", ""]
+- ["192.168.41.10:/mnt/myvol/data/container", "/mnt/container", "nfs4", ""]
